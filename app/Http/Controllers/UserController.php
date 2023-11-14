@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Http\Requests\UserLoginRequest;
 use App\Http\Requests\UserRegisterRequest;
+use App\Http\Requests\UserUpdateRequest;
 use App\Http\Resources\UserResource;
 use App\Models\User;
 use Illuminate\Http\Exceptions\HttpResponseException;
@@ -33,14 +34,23 @@ class UserController extends Controller
         $user->password = Hash::make($data['password']);
         $user->save();
 
-        return (new UserResource($user))->response()->setStatusCode(201);
+        return response()->json([
+            'data' => ['user' => $user],
+            'status' => 'success',
+            'meta' => [
+                'http_status'=> 200,
+                'total'=> 0,
+                'page'=> 0,
+                'last_page'=> 0
+            ]
+        ], 200);
     }
 
     public function login(UserLoginRequest $request)
     {
         $data = $request->validated();
 
-        $user = User::where('email', $data['email'])->first();
+        $user = User::where('email', $data['email'])->with('role', 'gender')->first();
         if(!$user || !Hash::check($data['password'], $user->password))
         {
             throw new HttpResponseException(response([
@@ -53,15 +63,68 @@ class UserController extends Controller
         }
 
         $token = $user->createToken('user login')->plainTextToken;
-        return response()->json(['user' => $user, 'access_token' => $token]);
+        return response()->json([
+            'data' => ['user' => $user, 'access_token' => $token],
+            'status' => 'success',
+        ], 200);
 
     }
 
     public function get(Request $request)
     {
 
+        $user = Auth::user()->load('role', 'gender');
+        return response()->json([
+            'data' => ['user' => $user],
+            'status' => 'success',
+            'meta' => [
+                'http_status'=> 200,
+                'total'=> 0,
+                'page'=> 0,
+                'last_page'=> 0
+            ]
+        ], 200);
+    }
+
+    public function update(UserUpdateRequest $request)
+    {
+        $data = $request->validated();
         $user = Auth::user();
-        return new UserResource($user);
+
+        if (isset($data['name'])) {
+            $user->name = $data['name'];
+        }
+        if (isset($data['email'])) {
+            $user->email = $data['email'];
+        }
+        if (isset($data['phone'])) {
+            $user->phone = $data['phone'];
+        }
+        if (isset($data['role_id'])) {
+            $user->role_id = $data['role_id'];
+        }
+        if (isset($data['gender_id'])) {
+            $user->gender_id = $data['gender_id'];
+        }
+        if (isset($data['is_status'])) {
+            $user->is_status = $data['is_status'];
+        }
+        if (isset($data['password'])) {
+            $user->password = Hash::make($data['password']);
+        }
+
+        $user->save();
+
+        return response()->json([
+            'data' => ['user' => $user],
+            'status' => 'success',
+            'meta' => [
+                'http_status'=> 200,
+                'total'=> 0,
+                'page'=> 0,
+                'last_page'=> 0
+            ]
+        ], 200);
     }
 
     public function logout(Request $request)
