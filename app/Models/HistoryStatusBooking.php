@@ -24,4 +24,9 @@ class HistoryStatusBooking extends Model
     {
         return $this->belongsTo(StatusHistory::class, "status_history_id", "id");
     }
+
+    public function booking(): BelongsTo
+    {
+        return $this->belongsTo(StatusHistory::class, "id", "booking_id");
+    }
 }

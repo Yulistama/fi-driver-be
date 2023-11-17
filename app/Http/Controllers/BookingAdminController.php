@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Http\Resources\BookingResource;
 use App\Models\Booking;
 use App\Models\HistoryStatusBooking;
+use App\Models\User;
 use Carbon\Carbon;
 use Illuminate\Http\Exceptions\HttpResponseException;
 use Illuminate\Http\JsonResponse;
@@ -74,6 +75,8 @@ class BookingAdminController extends Controller
                 'is_read' => 0,
                 'date_time' => Carbon::now()
             ]);
+
+            User::where('id', $request->driver_id)->update(['is_ready' => 1]);
         }else{
 
             Booking::where('id', $id)->update(['status_id' => 5]);

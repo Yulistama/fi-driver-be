@@ -38,6 +38,10 @@ Route::middleware('auth:sanctum', 'ability:*')->group(function () {
     Route::get('/booking/admin/all', [\App\Http\Controllers\BookingAdminController::class, 'getAll'])->name('booking.admin.all');
     Route::get('/booking/admin/detail/{idBooking}', [\App\Http\Controllers\BookingAdminController::class, 'getById'])->name('booking.admin.detail');
     Route::put('/booking/admin/update/{idBooking}', [\App\Http\Controllers\BookingAdminController::class, 'update'])->name('booking.admin.update');
+
+    Route::get('/notif/staff', [\App\Http\Controllers\NotificationController::class, 'getNotifStaff'])->name('notif.staff');
+    Route::get('/notif/driver', [\App\Http\Controllers\NotificationController::class, 'getNotifDriver'])->name('notif.driver');
+    Route::get('/notif/admin', [\App\Http\Controllers\NotificationController::class, 'getNotifAdmin'])->name('notif.admin');
 });
 
 Route::get('/not/token',  function (Request $request) {

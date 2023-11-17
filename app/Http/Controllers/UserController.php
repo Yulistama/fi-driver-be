@@ -54,12 +54,10 @@ class UserController extends Controller
         if(!$user || !Hash::check($data['password'], $user->password))
         {
             throw new HttpResponseException(response([
-                "errors" => [
-                    "message" => [
-                        "email or password wrong"
-                    ]
-                ]
-            ], 401));
+                "errors" => [[
+                    "message" => "email or password wrong"
+                ]]
+            ], 400));
         }
 
         $token = $user->createToken('user login')->plainTextToken;
