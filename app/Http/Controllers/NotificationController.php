@@ -12,7 +12,10 @@ class NotificationController extends Controller
     public function getNotifStaff ()
     {
         $user = Auth::user();
-        $notif = Booking::with('pickup_city', 'destination_city', 'history.status_history')->where('staff_id', $user->id)->get();
+        $notif = Booking::with('pickup_city', 'destination_city', 'history.status_history')
+                ->where('staff_id', $user->id)
+                ->orderBy('created_at', 'desc')
+                ->get();
 
         return response()->json([
             'data' => ['notif' => $notif],
@@ -29,7 +32,10 @@ class NotificationController extends Controller
     public function getNotifDriver ()
     {
         $user = Auth::user();
-        $notif = Booking::with('pickup_city', 'destination_city', 'history.status_history')->where('driver_id', $user->id)->get();
+        $notif = Booking::with('pickup_city', 'destination_city', 'history.status_history')
+                ->where('driver_id', $user->id)
+                ->orderBy('created_at', 'desc')
+                ->get();
 
         return response()->json([
             'data' => ['notif' => $notif],
@@ -45,7 +51,9 @@ class NotificationController extends Controller
 
     public function getNotifAdmin ()
     {
-        $notif = Booking::with('pickup_city', 'destination_city', 'history.status_history')->get();
+        $notif = Booking::with('pickup_city', 'destination_city', 'history.status_history')
+                ->orderBy('created_at', 'desc')
+                ->get();
 
         return response()->json([
             'data' => ['notif' => $notif],

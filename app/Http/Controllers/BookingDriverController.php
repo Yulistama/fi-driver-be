@@ -24,6 +24,7 @@ class BookingDriverController extends Controller
                     ->orWhere('status_id', 2)
                     ->orWhere('status_id', 3);
                 })
+            ->orderBy('created_at', 'desc')
             ->get();
 
         return response()->json([

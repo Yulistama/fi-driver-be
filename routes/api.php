@@ -20,8 +20,10 @@ Route::post('/users/login', [\App\Http\Controllers\UserController::class, 'login
 
 Route::middleware('auth:sanctum', 'ability:*')->group(function () {
     Route::post('/users/create', [\App\Http\Controllers\UserController::class, 'register'])->name('user.create');
-    Route::put('/users/update', [\App\Http\Controllers\UserController::class, 'update'])->name('user.update');
+    Route::post('/users/update', [\App\Http\Controllers\UserController::class, 'updateUser'])->name('user.update');
     Route::get('/users/get', [\App\Http\Controllers\UserController::class, 'get'] )->name('user.get');
+    Route::post('/users/store', [\App\Http\Controllers\UserController::class, 'store'])->name('user.store');
+    Route::post('/users/change-password', [\App\Http\Controllers\UserController::class, 'changePassword'])->name('user.change-password');
     Route::get('/users/logout', [\App\Http\Controllers\UserController::class, 'logout'] )->name('logout');
 
     Route::post('/booking/create', [\App\Http\Controllers\BookingStaffController::class, 'create'])->name('booking.create');
@@ -42,6 +44,11 @@ Route::middleware('auth:sanctum', 'ability:*')->group(function () {
     Route::get('/notif/staff', [\App\Http\Controllers\NotificationController::class, 'getNotifStaff'])->name('notif.staff');
     Route::get('/notif/driver', [\App\Http\Controllers\NotificationController::class, 'getNotifDriver'])->name('notif.driver');
     Route::get('/notif/admin', [\App\Http\Controllers\NotificationController::class, 'getNotifAdmin'])->name('notif.admin');
+
+    Route::get('/jadwal-driver', [\App\Http\Controllers\JadwalDriverController::class, 'getDriver'])->name('jadwal.driver');
+    Route::get('/city', [\App\Http\Controllers\CommonController::class, 'getCIty'])->name('city');
+
+
 });
 
 Route::get('/not/token',  function (Request $request) {

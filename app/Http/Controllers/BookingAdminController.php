@@ -16,7 +16,10 @@ class BookingAdminController extends Controller
 {
     public function getAll()
     {
-        $booking = Booking::with('user', 'driver', 'pickup_city', 'destination_city', 'status_booking', 'history.status_history')->get();
+        $booking = Booking::with('user', 'driver', 'pickup_city', 'destination_city', 'status_booking', 'history.status_history')
+                        ->orderBy('created_at', 'desc')
+                        ->get();
+
         return response()->json([
             'data' => ['booking' => $booking],
             'status' => 'success',

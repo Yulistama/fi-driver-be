@@ -28,7 +28,7 @@ class UserUpdateRequest extends FormRequest
             'email' => ['required'],
             'phone' => ['required'],
             'role_id' => ['required'],
-            'password' => ['required'],
+            'password' => ['nullable'],
             'gender_id' => ['required'],
             'is_status' => ['required'],
             'image' => ['nullable'],

@@ -60,6 +60,7 @@ class BookingStaffController extends Controller
                     ->orWhere('status_id', 2)
                     ->orWhere('status_id', 3);
                 })
+            ->orderBy('created_at', 'desc')
             ->get();
 
         return response()->json([
@@ -141,11 +142,21 @@ class BookingStaffController extends Controller
 
         $updatedBooking = Booking::find($id);
 
+        // HistoryStatusBooking::create([
+        //     'name' => 'Pesan Dibatalkan',
+        //     'booking_id' => $booking->id,
+        //     'description' => 'Staff membatalkan pesanan',
+        //     'image' => 'image.png',
+        //     'is_read' => 0,
+        //     'date_time' => Carbon::now()
+        // ]);
+
         HistoryStatusBooking::create([
-            'name' => 'Pesan Dibatalkan',
+            'status_history_id' => 8,
             'booking_id' => $booking->id,
-            'description' => 'Staff membatalkan pesanan',
-            'image' => 'image.png',
+            'description' => '',
+            'location' => '',
+            'image' => '',
             'is_read' => 0,
             'date_time' => Carbon::now()
         ]);
