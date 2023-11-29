@@ -11,6 +11,7 @@ use Illuminate\Http\Exceptions\HttpResponseException;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Storage;
 
 class BookingDriverController extends Controller
 {
@@ -109,12 +110,16 @@ class BookingDriverController extends Controller
         $updatedBooking = Booking::find($id);
 
 
+        if($request->hasFile('image')){
+            $file = $request->file('image')->store('image', 'public');
+        }
+
         HistoryStatusBooking::create([
             'status_history_id' => $request->status_history_id,
             'booking_id' => $booking->id,
             'description' => $request->note,
             'location' => $request->location,
-            'image' => $request->image,
+            'image' => $request->hasFile('image') ? $file : null,
             'is_read' => $request->is_read,
             'date_time' => Carbon::now()
         ]);

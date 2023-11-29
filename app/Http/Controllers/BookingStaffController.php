@@ -121,7 +121,7 @@ class BookingStaffController extends Controller
 
     }
 
-    public function update(int $id)
+    public function update(int $id, Request $request)
     {
         $user = Auth::user();
 
@@ -138,25 +138,16 @@ class BookingStaffController extends Controller
 
         Booking::where('id', $id)
             ->where('staff_id', $user->id)
-            ->update(['status_id' => 6]);
+            ->update(['status_id' => $request->status_id]);
 
         $updatedBooking = Booking::find($id);
 
-        // HistoryStatusBooking::create([
-        //     'name' => 'Pesan Dibatalkan',
-        //     'booking_id' => $booking->id,
-        //     'description' => 'Staff membatalkan pesanan',
-        //     'image' => 'image.png',
-        //     'is_read' => 0,
-        //     'date_time' => Carbon::now()
-        // ]);
-
         HistoryStatusBooking::create([
-            'status_history_id' => 8,
+            'status_history_id' => $request->status_history_id,
             'booking_id' => $booking->id,
-            'description' => '',
-            'location' => '',
-            'image' => '',
+            'description' => $request->description,
+            'location' => $request->location,
+            'image' => $request->image,
             'is_read' => 0,
             'date_time' => Carbon::now()
         ]);
