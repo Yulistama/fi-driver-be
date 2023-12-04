@@ -7,6 +7,7 @@ use App\Models\Booking;
 use App\Models\HistoryStatusBooking;
 use App\Models\User;
 use Carbon\Carbon;
+use Illuminate\Contracts\Database\Eloquent\Builder;
 use Illuminate\Http\Exceptions\HttpResponseException;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -14,20 +15,61 @@ use Illuminate\Support\Facades\Auth;
 
 class BookingAdminController extends Controller
 {
-    public function getAll()
+    public function getAll(Request $request)
     {
+        $page = $request->input('page', 1);
+        $size = $request->input('size', 5);
+        $statusInput = $request->input('status');
+
+        $status = '';
+        switch ($statusInput) {
+            case 'all':
+                $status = null;
+                break;
+            case 'menunggu':
+                $status = 1;
+                break;
+            case 'disetujui':
+                $status = 2;
+                break;
+            case 'berjalan':
+                $status = 3;
+                break;
+            case 'selesai':
+                $status = 4;
+                break;
+            case 'ditolak':
+                $status = 5;
+                break;
+            default:
+                $status = 6;
+        }
+
         $booking = Booking::with('user', 'driver', 'pickup_city', 'destination_city', 'status_booking', 'history.status_history')
-                        ->orderBy('created_at', 'desc')
-                        ->get();
+                        ->orderBy('created_at', 'desc');
+                        if ($status !== null) {
+                            $booking->where('status_id', $status);
+                        }
+
+        $booking = $booking->where(function (Builder $builder) use ($request) {
+            $name = $request->input('name');
+            if ($name) {
+                $builder->where(function (Builder $builder) use ($name) {
+                    $builder->orWhere('status_id', 'like', '%' . $name . '%');
+                });
+            }
+        });
+
+        $booking = $booking->paginate(perPage: $size, page: $page);
 
         return response()->json([
             'data' => ['booking' => $booking],
             'status' => 'success',
             'meta' => [
                 'http_status'=> 200,
-                'total'=> 0,
-                'page'=> 0,
-                'last_page'=> 0
+                'total' => $booking->total(),
+                'page' => $booking->currentPage(),
+                'last_page' => $booking->lastPage()
             ]
         ], 200);
     }
