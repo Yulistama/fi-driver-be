@@ -53,6 +53,25 @@ class UserController extends Controller
     {
         $data = $request->validated();
 
+        // Check if the email is registered
+        $existingUser = User::where('email', $data['email'])->first();
+        if (!$existingUser) {
+            throw new HttpResponseException(response([
+                "errors" => [[
+                    "message" => "Email not registered"
+                ]]
+            ], 400));
+        }
+
+        $aktiveUser = User::where('email', $data['email'])->first();
+        if ($aktiveUser->is_status === 0) {
+            throw new HttpResponseException(response([
+                "errors" => [[
+                    "message" => "User not active"
+                ]]
+            ], 400));
+        }
+
         $user = User::where('email', $data['email'])->with('role', 'gender')->first();
         if(!$user || !Hash::check($data['password'], $user->password))
         {
@@ -108,15 +127,17 @@ class UserController extends Controller
         ]);
 
         if ($validator->fails()) {
-        return response()->json(
-            [
-                'message' => 'Validation errors',
-                'errors' => $validator->errors()
-            ], 400);
+            throw new HttpResponseException(response([
+                "errors" => [[
+                    "message" => [$validator->errors()->first()]
+                ]]
+            ], 400));
         }
 
         if($request->hasFile('image')){
             $file = $request->file('image')->store('image', 'public');
+        }else{
+            $file = null;
         }
 
         $user = new User($request->all());
@@ -141,6 +162,71 @@ class UserController extends Controller
     public function updateUser(Request $request)
     {
         $user = Auth::user();
+
+        $validator = Validator::make($request->all(), [
+            'name' => 'required',
+            'email' => 'required|email|unique:users,email,'.$user->id,
+            'role_id' => 'required',
+            'phone' => 'required',
+            'position' => 'nullable',
+            'is_status' => 'required',
+            'number_vehicle' => 'nullable',
+            'tranpostation_type' => 'nullable',
+            'gender_id' => 'required',
+        ]);
+
+        if ($validator->fails()) {
+        return response()->json(
+            [
+                'message' => 'Validation errors',
+                'errors' => $validator->errors()
+            ], 400);
+        }
+
+        if($request->hasFile('image')){
+            if(isset($user->image) && file_exists(storage_path('app/public/'. $user->image))){
+                Storage::delete('public/'. $user->image);
+            }
+            $file = $request->file('image')->store('image', 'public');
+            $user->image = $file;
+        }
+
+        $user->name = $request->name;
+        $user->email = $request->email;
+        $user->phone = $request->phone;
+        $user->role_id = $request->role_id;
+        $user->gender_id = $request->gender_id;
+        $user->is_status = $request->is_status;
+
+        if (isset($request->password)) {
+            $user->password = Hash::make($request->password);
+        }
+
+        $user->update([$user]);
+
+        $user->image = url('storage/'.$user->image);
+
+        return response()->json([
+            'data' => ['user' => $user],
+            'status' => 'success',
+            'meta' => [
+                'http_status'=> 200,
+                'total'=> 0,
+                'page'=> 0,
+                'last_page'=> 0
+            ]
+        ], 200);
+    }
+
+    public function updateUserAdmin(int $id, Request $request)
+    {
+        // Find the user by ID
+        $user = User::find($id);
+
+        // Check if the user exists
+        if (!$user) {
+            return response()->json(['error' => 'User not found'], 404);
+        }
 
         $validator = Validator::make($request->all(), [
             'name' => 'required',
@@ -250,6 +336,28 @@ class UserController extends Controller
             ]
         ], 200);
 
+    }
+
+    public function deleteUser(int $id)
+    {
+        // Find the user by ID
+        $user = User::find($id);
+
+        // Check if the user exists
+        if (!$user) {
+            throw new HttpResponseException(response([
+                "errors" => [[
+                    "message" => 'User not found'
+                ]]
+            ], 400));
+        }
+
+        // Delete the user
+        $user->delete();
+
+        return response()->json([
+            'message' => 'User deleted successfully',
+        ], 200);
     }
 
     public function logout(Request $request)

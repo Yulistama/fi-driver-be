@@ -44,8 +44,11 @@ Route::middleware('auth:sanctum', 'ability:*')->group(function () {
     Route::get('/admin/booking-waiting/dashboard', [\App\Http\Controllers\DashboardAdminController::class, 'getBookingWaiting'])->name('booking-waiting.admin.dashboard');
 
     Route::get('/admin/staff', [\App\Http\Controllers\StaffAdminController::class, 'getStaff'])->name('admin.staff');
+    Route::post('/admin/update/user/{idUser}', [\App\Http\Controllers\UserController::class, 'updateUserAdmin'])->name('admin.user.update');
+    Route::delete('/admin/delete/user/{idUser}', [\App\Http\Controllers\UserController::class, 'deleteUser'])->name('admin.user.delete');
     Route::get('/admin/driver', [\App\Http\Controllers\DriverAdminController::class, 'getDriver'])->name('admin.driver');
     Route::get('/admin/jadwal-driver', [\App\Http\Controllers\DriverAdminController::class, 'getJadwalDriver'])->name('admin.jadwal.driver');
+    Route::get('/admin/driver-ready', [\App\Http\Controllers\DriverAdminController::class, 'getDriverReady'])->name('admin.driver.ready');
     Route::get('/admin/master', [\App\Http\Controllers\MasterAdminController::class, 'getMasterAdmin'])->name('admin.master');
 
     Route::get('/notif/staff', [\App\Http\Controllers\NotificationController::class, 'getNotifStaff'])->name('notif.staff');

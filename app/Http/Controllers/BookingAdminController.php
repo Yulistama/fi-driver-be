@@ -77,6 +77,13 @@ class BookingAdminController extends Controller
     public function getById(int $id)
     {
         $booking = Booking::with('user', 'driver', 'pickup_city', 'destination_city', 'status_booking', 'history.status_history')->where('id', $id)->first();
+            if ($booking->user && $booking->user->image !== null) {
+                $booking->user->image = url('storage/' . $booking->user->image);
+            }
+            if ($booking->driver && $booking->driver->image !== null) {
+                $booking->driver->image = url('storage/' . $booking->driver->image);
+            }
+
         return response()->json([
             'data' => ['booking' => $booking],
             'status' => 'success',

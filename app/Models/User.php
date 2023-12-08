@@ -44,6 +44,11 @@ class User extends Authenticatable
         return $this->belongsTo(Role::class);
     }
 
+    public function booking(): HasMany
+    {
+        return $this->hasMany(Booking::class, 'driver_id', 'id');
+    }
+
     /**
      * The attributes that should be hidden for serialization.
      *
