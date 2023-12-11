@@ -7,6 +7,7 @@ use App\Models\User;
 use Carbon\Carbon;
 use Illuminate\Contracts\Database\Eloquent\Builder;
 use Illuminate\Http\Request;
+use Illuminate\Pagination\LengthAwarePaginator;
 
 class DriverAdminController extends Controller
 {
@@ -38,7 +39,7 @@ class DriverAdminController extends Controller
                 });
 
         $driver = $driver->where(function (Builder $builder) use ($request) {
-            $name = $request->input('name');
+            $name = $request->input('search');
             if ($name) {
                 $builder->where(function (Builder $builder) use ($name) {
                     $builder->orWhere('name', 'like', '%' . $name . '%');
@@ -70,73 +71,108 @@ class DriverAdminController extends Controller
     public function getJadwalDriver(Request $request)
     {
         $page = $request->input('page', 1);
-        $size = $request->input('size', 5);
-        $statusInput = $request->input('status');
+        $dateInput = $request->input('tgl');
 
-        $status = '';
-        switch ($statusInput) {
-            case 'dipesan':
-                $status = 1;
-                break;
-            case 'tersedia':
-                $status = 0;
-                break;
-            default:
-                $status = null;
+        $date = '';
+        if($dateInput){
+            $date = $request->tgl;
+        }else{
+            $date = Carbon::today()->toDateString();
         }
 
-        $booking = Booking::where('estimated_pickup_time', $request->tgl)
-                    ->where(function ($query) use ($request) {
-                        $tgl = $request->input('tgl');
-                        $query->orWhere('estimated_finish_time', $tgl);
-                        $query->orWhere('driver_id', '!=', null);
-                    })
-                    ->get();
+        if(Booking::count() === 0){
+            $ready = User::where('role_id', 2)->get();
+        }else{
 
-        $driver = User::with('gender')
-                ->where('role_id', 2)
-                ->orderBy('created_at', 'desc')
-                ->where(function ($query) {
-                    $query->orWhere('is_status', 1);
+            $notReady = [];
+
+            $booked = Booking::where(function ($query) use ($date) {
+                $query->where(function ($query) use ($date) {
+                    $query->where('estimated_pickup_time', '<=', $date)
+                        ->where('estimated_finish_time', '>=', $date)
+                        ->where('status_id', '!=', 4)
+                        ->where('driver_id', '!=', null);
                 })
-                ->where(function ($query) use ($status) {
-                    if ($status !== null) {
-                        $query->orWhere('is_ready', $status);
-                    }
+                ->orWhere(function ($query) use ($date) {
+                    $query->whereDate('estimated_pickup_time', '=', $date)
+                        ->where('status_id', '!=', 4)
+                        ->where('driver_id', '!=', null);
                 })
-                ->where(function ($query) use ($booking) {
-                    if ($booking !== null) {
-                        $query->orWhere('id', '!=', $booking->driver_id);
-                    }
+                ->orWhere(function ($query) use ($date) {
+                    $query->whereDate('estimated_finish_time', '=', $date)
+                        ->where('status_id', '!=', 4)
+                        ->where('driver_id', '!=', null);
                 });
+            })
+            ->get();
 
-        $driver = $driver->where(function (Builder $builder) use ($request) {
+            // return $booked;
+
+            foreach ($booked as $booking) {
+                $notReady[] = $booking->driver_id;
+            }
+
+            // Query to get all users driver
+            $allUsers = User::with('gender')
+                        ->where('role_id', 2)
+                        ->where('is_status', 1)
+                        ->get();
+
+            // Add 'ready' attribute to each user
+            $ready = $allUsers->map(function ($user) use ($notReady) {
+                $user->ready = !in_array($user->id, $notReady);
+                return $user;
+            });
+
+        }
+
+        $ready = $ready->filter(function ($user) use ($request) {
             $name = $request->input('name');
             if ($name) {
-                $builder->where(function (Builder $builder) use ($name) {
-                    $builder->orWhere('name', 'like', '%' . $name . '%');
-                });
+                return stripos($user->name, $name) !== false;
             }
+            return true; // If no name filter, include all users
         });
 
-        $driver = $driver->paginate(perPage: $size, page: $page);
+        // Assuming $perPage and $page are already defined
+        $perPage = request('size', 5);
+        $page = request('page', 1);
 
-        $driver->getCollection()->transform(function ($item) {
-            if ($item->image !== null) {
-                $item->image = url('storage/' . $item->image);
+        // $ready is your filtered and ready collection
+        $total = count($ready);
+
+        // Get the items for the current page
+        $currentPageItems = array_slice($ready->toArray(), ($page - 1) * $perPage, $perPage);
+
+        // Create the paginator instance
+        $paginator = new LengthAwarePaginator(
+            $currentPageItems,
+            $total,
+            $perPage,
+            $page,
+            ['path' => url()->current()]
+        );
+
+        // Transform the paginator to an array
+        $paginator->getCollection()->transform(function ($item) {
+            if ($item['image'] !== null) {
+                $item['image'] = url('storage/' . $item['image']);
             }
             return $item;
         });
 
+        // Transform the paginator to an array
+        $paginatedData = $paginator->toArray();
+
         return response()->json([
-            'data' => ['driver' => $driver],
+            'data' => ['driver' => $paginatedData],
             'status' => 'success',
             'meta' => [
-                'http_status'=> 200,
-                'total' => $driver->total(),
-                'page' => $driver->currentPage(),
-                'last_page' => $driver->lastPage()
-            ]
+                'http_status' => 200,
+                'total' => $total,
+                'page' => $page,
+                'last_page' => $paginator->lastPage(),
+            ],
         ], 200);
     }
 

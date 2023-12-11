@@ -22,7 +22,7 @@ class BookingStaffController extends Controller
         $user = Auth::user();
 
         $booking = new Booking($data);
-        $booking->code = str_pad(rand(0, 99999), 5, '0', STR_PAD_LEFT);
+        $booking->code = str_pad(rand(0, 99999), 8, '0', STR_PAD_LEFT);
         $booking->status_id = 1;
         $booking->staff_id = $user->id;
         $booking->driver_id = null;

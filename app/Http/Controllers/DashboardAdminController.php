@@ -54,10 +54,14 @@ class DashboardAdminController extends Controller
     {
         $page = $request->input('page', 1);
         $size = $request->input('size', 5);
+        $date = $request->input('date');
 
         $booking = Booking::with('user', 'driver', 'pickup_city', 'destination_city', 'status_booking')
                         ->orderBy('created_at', 'desc')
-                        ->where('status_id', 1);
+                        ->where('status_id', 1)
+                        ->when($date, function ($query) use ($date) {
+                            return $query->whereDate('created_at', $date);
+                        });
 
         $booking = $booking->where(function (Builder $builder) use ($request) {
             $name = $request->input('name');

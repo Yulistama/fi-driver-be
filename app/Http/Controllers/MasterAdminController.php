@@ -36,7 +36,7 @@ class MasterAdminController extends Controller
                 });
 
         $master = $master->where(function (Builder $builder) use ($request) {
-            $name = $request->input('name');
+            $name = $request->input('search');
             if ($name) {
                 $builder->where(function (Builder $builder) use ($name) {
                     $builder->orWhere('name', 'like', '%' . $name . '%');

@@ -19,6 +19,7 @@ class BookingAdminController extends Controller
     {
         $page = $request->input('page', 1);
         $size = $request->input('size', 5);
+        $date = $request->input('date');
         $statusInput = $request->input('status');
 
         $status = '';
@@ -46,16 +47,29 @@ class BookingAdminController extends Controller
         }
 
         $booking = Booking::with('user', 'driver', 'pickup_city', 'destination_city', 'status_booking', 'history.status_history')
-                        ->orderBy('created_at', 'desc');
+                        ->orderBy('created_at', 'desc')
+                        ->when($date, function ($query) use ($date) {
+                            return $query->whereDate('created_at', $date);
+                        });
                         if ($status !== null) {
                             $booking->where('status_id', $status);
                         }
 
+
         $booking = $booking->where(function (Builder $builder) use ($request) {
-            $name = $request->input('name');
+            $name = $request->input('search');
             if ($name) {
                 $builder->where(function (Builder $builder) use ($name) {
-                    $builder->orWhere('status_id', 'like', '%' . $name . '%');
+                    $builder->orWhere('code', 'like', '%' . $name . '%')
+                            ->orWhereHas('user', function ($query) use ($name) {
+                                $query->where('name', 'like', '%' . $name . '%');
+                            })
+                            ->orWhereHas('driver', function ($query) use ($name) {
+                                $query->where('name', 'like', '%' . $name . '%');
+                            })
+                            ->orWhereHas('status_booking', function ($query) use ($name) {
+                                $query->where('name', 'like', '%' . $name . '%');
+                            });
                 });
             }
         });
