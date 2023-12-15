@@ -197,6 +197,9 @@ class UserController extends Controller
         $user->role_id = $request->role_id;
         $user->gender_id = $request->gender_id;
         $user->is_status = $request->is_status;
+        $user->number_vehicle = $request->number_vehicle;
+        $user->tranpostation_type = $request->tranpostation_type;
+        $user->position = $request->position;
 
         if (isset($request->password)) {
             $user->password = Hash::make($request->password);
@@ -259,6 +262,9 @@ class UserController extends Controller
         $user->name = $request->name;
         $user->email = $request->email;
         $user->phone = $request->phone;
+        $user->number_vehicle = $request->number_vehicle;
+        $user->tranpostation_type = $request->tranpostation_type;
+        $user->position = $request->position;
         $user->role_id = $request->role_id;
         $user->gender_id = $request->gender_id;
         $user->is_status = $request->is_status;
@@ -357,6 +363,46 @@ class UserController extends Controller
 
         return response()->json([
             'message' => 'User deleted successfully',
+        ], 200);
+    }
+
+    public function forgotPassword(Request $request)
+    {
+        $user = User::where('email', $request->email)->first();
+
+        if (!$user) {
+            throw new HttpResponseException(response([
+                "errors" => [[
+                    "message" => "User not found"
+                ]]
+            ], 400));
+        }
+
+        $user->name = $user->name;
+        $user->email = $user->email;
+        $user->phone = $user->phone;
+        $user->number_vehicle = $user->number_vehicle;
+        $user->tranpostation_type = $user->tranpostation_type;
+        $user->position = $user->position;
+        $user->role_id = $user->role_id;
+        $user->gender_id = $user->gender_id;
+        $user->is_status = $user->is_status;
+
+        if (isset($request->new_password)) {
+            $user->password = Hash::make($request->new_password);
+        }
+
+        $user->update([$user]);
+
+        return response()->json([
+            'data' => ['user' => $user],
+            'status' => 'success change password',
+            'meta' => [
+                'http_status'=> 200,
+                'total'=> 0,
+                'page'=> 0,
+                'last_page'=> 0
+            ]
         ], 200);
     }
 

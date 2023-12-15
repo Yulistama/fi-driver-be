@@ -103,8 +103,17 @@ class BookingStaffController extends Controller
     public function getById(int $id): JsonResponse
     {
         $user = Auth::user();
-        $booking = Booking::with('user', 'driver', 'pickup_city', 'destination_city', 'status_booking', 'history.status_history')
-            ->where('id', $id)
+        $booking = Booking::with([
+                'user',
+                'driver',
+                'pickup_city',
+                'destination_city',
+                'status_booking',
+                'history.status_history',
+                'history' => function ($query) {
+                    $query->orderBy('created_at', 'desc');
+                },
+            ])->where('id', $id)
             ->where('staff_id', $user->id)
             ->first();
 

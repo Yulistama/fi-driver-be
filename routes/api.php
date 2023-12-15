@@ -17,6 +17,7 @@ use Illuminate\Support\Facades\Route;
 */
 
 Route::post('/users/login', [\App\Http\Controllers\UserController::class, 'login'] )->name('login');
+Route::post('/users/forgot-password', [\App\Http\Controllers\UserController::class, 'forgotPassword'] )->name('forgot.password');
 
 Route::middleware('auth:sanctum', 'ability:*')->group(function () {
     Route::post('/users/create', [\App\Http\Controllers\UserController::class, 'register'])->name('user.create');

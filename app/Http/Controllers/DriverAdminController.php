@@ -81,11 +81,17 @@ class DriverAdminController extends Controller
         }
 
         if(Booking::count() === 0){
-            $ready = User::where('role_id', 2)->get();
+            $allUsers = User::where('role_id', 2)
+                        ->where('is_status', 1)
+                        ->get();
+
+            $ready = $allUsers->map(function ($user) {
+                $user->ready = true;
+                return $user;
+            });
         }else{
 
             $notReady = [];
-
             $booked = Booking::where(function ($query) use ($date) {
                 $query->where(function ($query) use ($date) {
                     $query->where('estimated_pickup_time', '<=', $date)

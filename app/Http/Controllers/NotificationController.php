@@ -12,9 +12,15 @@ class NotificationController extends Controller
     public function getNotifStaff ()
     {
         $user = Auth::user();
-        $notif = Booking::with('pickup_city', 'destination_city', 'history.status_history')
+        $notif = Booking::with([
+                'pickup_city',
+                'destination_city',
+                'history.status_history',
+                'history' => function ($query) {
+                        $query->orderBy('created_at', 'desc');
+                    },
+                ])
                 ->where('staff_id', $user->id)
-                ->orderBy('created_at', 'desc')
                 ->get();
 
         return response()->json([
@@ -32,9 +38,15 @@ class NotificationController extends Controller
     public function getNotifDriver ()
     {
         $user = Auth::user();
-        $notif = Booking::with('pickup_city', 'destination_city', 'history.status_history')
+        $notif = Booking::with([
+                'pickup_city',
+                'destination_city',
+                'history.status_history',
+                'history' => function ($query) {
+                            $query->orderBy('created_at', 'desc');
+                        },
+                ])
                 ->where('driver_id', $user->id)
-                ->orderBy('created_at', 'desc')
                 ->get();
 
         return response()->json([
@@ -51,8 +63,14 @@ class NotificationController extends Controller
 
     public function getNotifAdmin ()
     {
-        $notif = Booking::with('pickup_city', 'destination_city', 'history.status_history')
-                ->orderBy('created_at', 'desc')
+        $notif = Booking::with([
+                'pickup_city',
+                'destination_city',
+                'history.status_history',
+                'history' => function ($query) {
+                        $query->orderBy('created_at', 'desc');
+                    },
+                ])
                 ->get();
 
         return response()->json([
