@@ -125,8 +125,9 @@ class DriverAdminController extends Controller
                         ->get();
 
             // Add 'ready' attribute to each user
-            $ready = $allUsers->map(function ($user) use ($notReady) {
+            $ready = $allUsers->map(function ($user) use ($notReady, $booked) {
                 $user->ready = !in_array($user->id, $notReady);
+                $user->bookingId = $booked->where('driver_id', $user->id)->pluck('id')->first() ?? 0;
                 return $user;
             });
 

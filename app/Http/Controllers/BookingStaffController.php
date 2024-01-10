@@ -86,6 +86,7 @@ class BookingStaffController extends Controller
                     ->orWhere('status_id', 5)
                     ->orWhere('status_id', 6);
                 })
+            ->orderBy('created_at', 'desc')
             ->get();
 
         return response()->json([
@@ -103,6 +104,7 @@ class BookingStaffController extends Controller
     public function getById(int $id): JsonResponse
     {
         $user = Auth::user();
+
         $booking = Booking::with([
                 'user',
                 'driver',
@@ -116,6 +118,19 @@ class BookingStaffController extends Controller
             ])->where('id', $id)
             ->where('staff_id', $user->id)
             ->first();
+        if ($booking && $booking->history) {
+            foreach ($booking->history as $history) {
+                if ($history->image) {
+                    $history->image = url('storage/' . $history->image);
+                }
+            }
+        }
+        if ($booking->user && $booking->user->image !== null) {
+            $booking->user->image = url('storage/' . $booking->user->image);
+        }
+        if ($booking->driver && $booking->driver->image !== null) {
+            $booking->driver->image = url('storage/' . $booking->driver->image);
+        }
 
         return response()->json([
             'data' => ['booking' => $booking],

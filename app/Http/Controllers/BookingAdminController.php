@@ -55,6 +55,14 @@ class BookingAdminController extends Controller
                             $booking->where('status_id', $status);
                         }
 
+        // if ($booking->user && $booking->user->image !== null) {
+        //     $booking->user->image = url('storage/' . $booking->user->image);
+        // }
+        // if ($booking->driver && $booking->driver->image !== null) {
+        //     $booking->driver->image = url('storage/' . $booking->driver->image);
+        // }
+
+
 
         $booking = $booking->where(function (Builder $builder) use ($request) {
             $name = $request->input('search');
@@ -74,7 +82,18 @@ class BookingAdminController extends Controller
             }
         });
 
+        // $booking->transform(function ($item) {
+        //     if ($item->user && $item->user->image !== null) {
+        //         $item->user->image = url('storage/' . $item->user->image);
+        //     }
+        //     if ($item->driver && $item->driver->image !== null) {
+        //         $item->driver->image = url('storage/' . $item->driver->image);
+        //     }
+
+        //     return $item;
+        // });
         $booking = $booking->paginate(perPage: $size, page: $page);
+
 
         return response()->json([
             'data' => ['booking' => $booking],
@@ -101,6 +120,13 @@ class BookingAdminController extends Controller
                             $query->orderBy('created_at', 'desc');
                         },
                     ])->where('id', $id)->first();
+            if ($booking && $booking->history) {
+                foreach ($booking->history as $history) {
+                    if ($history->image) {
+                        $history->image = url('storage/' . $history->image);
+                    }
+                }
+            }
             if ($booking->user && $booking->user->image !== null) {
                 $booking->user->image = url('storage/' . $booking->user->image);
             }
@@ -152,7 +178,7 @@ class BookingAdminController extends Controller
                 'date_time' => Carbon::now()
             ]);
 
-            User::where('id', $request->driver_id)->update(['is_ready' => 1]);
+            // User::where('id', $request->driver_id)->update(['is_ready' => 1]);
         }else{
 
             Booking::where('id', $id)->update(['status_id' => 5]);

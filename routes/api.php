@@ -36,6 +36,7 @@ Route::middleware('auth:sanctum', 'ability:*')->group(function () {
     Route::get('/booking/driver/active', [\App\Http\Controllers\BookingDriverController::class, 'getAllByActive'])->name('booking.driver.active');
     Route::get('/booking/driver/history', [\App\Http\Controllers\BookingDriverController::class, 'getAllByHistory'])->name('booking.driver.history');
     Route::get('/booking/driver/{idBooking}', [\App\Http\Controllers\BookingDriverController::class, 'getById'])->name('booking.driver.detail');
+    Route::get('/booking/driver-history/{idBooking}', [\App\Http\Controllers\BookingDriverController::class, 'getByIdHistory'])->name('booking.driver.detail.history');
     Route::post('/booking/driver/update/{idBooking}', [\App\Http\Controllers\BookingDriverController::class, 'update'])->name('booking.driver.update');
 
     Route::get('/booking/admin/all', [\App\Http\Controllers\BookingAdminController::class, 'getAll'])->name('booking.admin.all');
