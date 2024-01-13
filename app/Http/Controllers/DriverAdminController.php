@@ -165,6 +165,9 @@ class DriverAdminController extends Controller
             if ($item['image'] !== null) {
                 $item['image'] = url('storage/' . $item['image']);
             }
+            if ($item['attachment'] !== null) {
+                $item['attachment'] = url('storage/' . $item['attachment']);
+            }
             return $item;
         });
 
@@ -189,7 +192,9 @@ class DriverAdminController extends Controller
         $size = $request->input('size', 30);
 
         if(Booking::count() === 0){
-            $ready = User::where('role_id', 2)->get();
+            $ready = User::where('role_id', 2)
+                    ->where('is_ready', 0)
+                    ->get();
         }else{
 
             $startDate = Carbon::parse($request->tgl_pickup)->startOfDay();
@@ -220,6 +225,7 @@ class DriverAdminController extends Controller
             }
 
             $ready = User::whereNotIn('id', $notReady)
+                    ->where('is_ready', 0)
                     ->where('role_id', 2);
         }
 

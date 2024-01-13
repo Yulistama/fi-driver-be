@@ -190,6 +190,13 @@ class UserController extends Controller
             $file = $request->file('image')->store('image', 'public');
             $user->image = $file;
         }
+        if($request->hasFile('attachment')){
+            if(isset($user->attachment) && file_exists(storage_path('app/public/'. $user->attachment))){
+                Storage::delete('public/'. $user->attachment);
+            }
+            $file = $request->file('attachment')->store('attachment', 'public');
+            $user->attachment = $file;
+        }
 
         $user->name = $request->name;
         $user->email = $request->email;
@@ -200,6 +207,12 @@ class UserController extends Controller
         $user->number_vehicle = $request->number_vehicle;
         $user->tranpostation_type = $request->tranpostation_type;
         $user->position = $request->position;
+
+        $user->is_ready = $request->is_ready;
+        $user->subjek_status = $request->subjek_status;
+        $user->date_start_status = $request->date_start_status;
+        $user->date_finish_status = $request->date_finish_status;
+        $user->reason = $request->reason;
 
         if (isset($request->password)) {
             $user->password = Hash::make($request->password);
