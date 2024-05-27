@@ -55,6 +55,23 @@ class BookingAdminController extends Controller
                             $booking->where('status_id', $status);
                         }
 
+        // foreach ($booking as $book) {
+        //     if ($book->user && $book->user->image !== null) {
+        //         // Check if the image URL is already a full URL
+        //         if (!filter_var($book->user->image, FILTER_VALIDATE_URL)) {
+        //             $book->user->image = url('storage/' . $book->user->image);
+        //         }
+        //     }
+
+        //     if ($book->driver && $book->driver->image !== null) {
+        //         // Check if the image URL is already a full URL
+        //         if (!filter_var($book->driver->image, FILTER_VALIDATE_URL)) {
+        //             $book->driver->image = url('storage/' . $book->driver->image);
+        //         }
+        //     }
+        // }
+
+
         // if ($booking->user && $booking->user->image !== null) {
         //     $booking->user->image = url('storage/' . $booking->user->image);
         // }

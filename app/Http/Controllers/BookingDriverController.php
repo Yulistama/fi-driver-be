@@ -27,13 +27,28 @@ class BookingDriverController extends Controller
                 })
             ->orderBy('created_at', 'desc')
             ->get();
+        // foreach ($bookings as $booking) {
+        //     if ($booking->user && $booking->user->image !== null) {
+        //         $booking->user->image = url('storage/' . $booking->user->image);
+        //     }
+
+        //     if ($booking->driver && $booking->driver->image !== null) {
+        //         $booking->driver->image = url('storage/' . $booking->driver->image);
+        //     }
+        // }
         foreach ($bookings as $booking) {
             if ($booking->user && $booking->user->image !== null) {
-                $booking->user->image = url('storage/' . $booking->user->image);
+                // Check if the image URL already starts with "http://" or "https://"
+                if (!preg_match("~^(?:f|ht)tps?://~i", $booking->user->image)) {
+                    $booking->user->image = url('storage/' . $booking->user->image);
+                }
             }
 
             if ($booking->driver && $booking->driver->image !== null) {
-                $booking->driver->image = url('storage/' . $booking->driver->image);
+                // Check if the image URL already starts with "http://" or "https://"
+                if (!preg_match("~^(?:f|ht)tps?://~i", $booking->driver->image)) {
+                    $booking->driver->image = url('storage/' . $booking->driver->image);
+                }
             }
         }
 
